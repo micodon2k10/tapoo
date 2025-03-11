@@ -17,7 +17,7 @@ type Dimensions struct {
 }
 
 // GenerateMaze converts the created grid view playing field into a series on paths and walls.
-// The Maze is created such that only a few paths can exists between the starting point and
+// The Maze is created such that only a single path can exists between the starting point and
 // and the goal.
 func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, error) {
 	var (
@@ -33,6 +33,10 @@ func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, err
 		currentPos = startPos
 		cellsPath  = []int{startPos}
 	)
+
+	VisitedCells[currentPos] = config.GetCellAddress(currentPos)
+
+	cellsPath = append(cellsPath, currentPos)
 
 	if err != nil {
 		return [][]string{}, startPos, finalPos[1], err
