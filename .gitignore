@@ -14,4 +14,9 @@
 .glide/
 
 # Prototyping Files
-.prototype
+*.prototype
+
+vendor/
+*.lock
+*.log
+_DS*
