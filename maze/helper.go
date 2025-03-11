@@ -1,16 +1,17 @@
-package tapoo
+package maze
 
 import (
 	"fmt"
 	"math"
+	"time"
 )
 
 type (
 	// CellAddress defines the nine points/coordinates that make up an individual cell.
 	// Each of the points define the location of a character that is meant to be a
-	// wall or a path of the maze. MiddleCenter represents the part of the path of the maze,
+	// wall or a path of the maze. MiddleCenter represents a part of the path of the maze,
 	// while BottomCenter, BottomLeft, BottomRight, MiddleLeft, MiddleRight, TopCenter,
-	// TopLeft and TopRight can either be part of the path or part the wall of the maze.
+	// TopLeft and TopRight can either be a part of the path or a part the wall of the maze.
 	CellAddress struct {
 		BottomCenter []int
 		BottomLeft   []int
@@ -32,37 +33,22 @@ type (
 		Right  int
 		Top    int
 	}
-
-	// Dimensions defines the actual number of cells that make up the maze along the vertical and
-	// the horizontal edges. Length represents the number of the cells along the horizontal
-	// edge while Width represents the number of the cells along the vertical edge.
-	Dimensions struct {
-		Length int
-		Width  int
-	}
 )
 
-// CreatePlayingField creates the initial version of the maze which a grid of cells.
+// CreatePlayingField creates the initial version of the maze which is a grid of cells.
 // The cells are created with characters that are printable on the terminal.
-// CreatePlayingField accept a paramenter with intensity of thick the maze walls should be
-// created.
+// CreatePlayingField accept a paramenter with intensity of how thick the
+// maze walls should be.
 func (config *Dimensions) CreatePlayingField(intensity int) ([][]string, error) {
 	var (
 		chars []string
-		ok    bool
+		err   error
 
 		data = [][]string{}
-
-		walls = map[int][]string{
-			1: []string{"|", "---"},
-			2: []string{"╏", "╍╍╍"},
-			3: []string{"║", "==="},
-		}
 	)
 
-	if chars, ok = walls[intensity]; !ok {
-		return data, fmt.Errorf(
-			"Invalid value of intensity found: %d. Allowed 1, 2 and 3", intensity)
+	if chars, err = getWallCharacters(intensity); err != nil {
+		return data, err
 	}
 
 	for i := 0; i < (2*config.Width)+1; i++ {
@@ -88,7 +74,7 @@ func (config *Dimensions) CreatePlayingField(intensity int) ([][]string, error) 
 
 // GetCellAddress creates and returns the cell address of the provided cell.
 // A cell address is defined by the nine coordinates, where each of them represents the
-// actual position of a terminal printable character which becomes part of the maze.
+// actual position of a terminal printable character that becomes a part of the maze.
 func (config *Dimensions) GetCellAddress(cellNo int) CellAddress {
 	var len int
 
@@ -104,15 +90,15 @@ func (config *Dimensions) GetCellAddress(cellNo int) CellAddress {
 	len = len * 2
 
 	return CellAddress{
-		TopRight:     []int{wid - 2, len - 2},
-		TopCenter:    []int{wid - 2, len - 1},
-		TopLeft:      []int{wid - 2, len},
-		MiddleRight:  []int{wid - 1, len - 2},
-		MiddleCenter: []int{wid - 1, len - 1},
-		MiddleLeft:   []int{wid - 1, len},
-		BottomRight:  []int{wid, len - 2},
 		BottomCenter: []int{wid, len - 1},
-		BottomLeft:   []int{wid, len},
+		BottomLeft:   []int{wid, len - 2},
+		BottomRight:  []int{wid, len},
+		MiddleCenter: []int{wid - 1, len - 1},
+		MiddleLeft:   []int{wid - 1, len - 2},
+		MiddleRight:  []int{wid - 1, len},
+		TopCenter:    []int{wid - 2, len - 1},
+		TopLeft:      []int{wid - 2, len - 2},
+		TopRight:     []int{wid - 2, len},
 	}
 }
 
@@ -149,7 +135,31 @@ func (config *Dimensions) GetCellNeighbors(cellNo int) CellNeighbors {
 	return neighbors
 }
 
+// GetRandomNo returns a random number generated from
+// the current timestamp and should be less the max value
+// provided and greater than or equal to zero. (0 <= X < max)
+func GetRandomNo(max int) int {
+	return int(time.Now().UnixNano() % int64(max))
+}
+
 // getCeiledDivisor calculates the ceiled divisor of the two values passed.
 func getCeiledDivisor(num, dinom int) int {
 	return int(math.Ceil(float64(num) / float64(dinom)))
+}
+
+// getWallCharacters returns the maze wall characters associated with the provided intensity.
+// If invalid intensity is used an error is thrown.
+func getWallCharacters(intensity int) ([]string, error) {
+	chars, ok := map[int][]string{
+		1: []string{"|", "---", "-"},
+		2: []string{"╏", "╍╍╍", "╍"},
+		3: []string{"║", "===", "="},
+	}[intensity]
+
+	if ok {
+		return chars, nil
+	}
+
+	return chars, fmt.Errorf(
+		"Invalid value of intensity found: %d. Allowed 1, 2 and 3", intensity)
 }

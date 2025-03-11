@@ -1,4 +1,4 @@
-package tapoo
+package maze
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 // TestCreatePlayingField tests the functionality of CreatePlayingField
 func TestCreatePlayingField(t *testing.T) {
 	var (
+		compressedView []string
 		err            error
 		gridView       [][]string
-		compressedView []string
 
 		val = &Dimensions{
 			Length: 17,
@@ -23,10 +23,7 @@ func TestCreatePlayingField(t *testing.T) {
 		}
 	)
 
-	log.Println("---- TestCreatePlayingField ----")
-
 	Convey("Given the the maze wall intensity ", t, func() {
-
 		Convey("A grid view should be generated without an error given "+
 			"the correct intensity ", func() {
 			for _, intensity := range []int{1, 2, 3} {
@@ -84,8 +81,6 @@ func TestGetCellAddress(t *testing.T) {
 			Width:  5,
 		}
 	)
-
-	log.Println("---- TestGetCellAddress ----")
 
 	Convey("Given the grid view of 6 by 5 cells of a maze ", t, func() {
 
@@ -153,8 +148,6 @@ func TestGetCellNeighbors(t *testing.T) {
 			Width:  5,
 		}
 	)
-
-	log.Println("---- TestGetCellNeighbors ----")
 
 	Convey("Given cells with their expected neighbors in a grid view of 6 by 5 cells", t, func() {
 
