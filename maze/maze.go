@@ -4,9 +4,9 @@ import (
 	"strings"
 )
 
-// VisitedCells represents the cells whose numbers are mapped to their respective addresses.
+// visitedCells represents the cells whose numbers are mapped to their respective addresses.
 // It is used in creating and navigating through the maze.
-var VisitedCells = map[int]CellAddress{}
+var visitedCells = map[int]cellAddress{}
 
 // Dimensions defines the actual number of cells that make up the maze along the vertical and
 // the horizontal edges. Length represents the number of the cells along the horizontal
@@ -19,30 +19,30 @@ type Dimensions struct {
 // GenerateMaze converts the created grid view playing field into a series on paths and walls.
 // The Maze is created such that only a single path can exists between the starting point and
 // and the goal.
-func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, error) {
+func (config *Dimensions) GenerateMaze(intensity int) ([][]string, []int, []int, error) {
 	var (
 		neighbors []int
-		ok        bool
 		randPos   int
 
-		maze, err = config.CreatePlayingField(intensity)
-		startPos  = config.getStartPosition()
-
-		finalPos = []int{1, startPos}
-
+		maze, err  = config.createPlayingField(intensity)
+		startPos   = config.getStartPosition()
+		finalPos   = []int{1, startPos}
 		currentPos = startPos
 		cellsPath  = []int{startPos}
 	)
 
-	VisitedCells[currentPos] = config.GetCellAddress(currentPos)
+	visitedCells[currentPos] = config.getCellAddress(currentPos)
 
 	cellsPath = append(cellsPath, currentPos)
 
 	if err != nil {
-		return [][]string{}, startPos, finalPos[1], err
+		return [][]string{},
+			config.getCellAddress(startPos).MiddleCenter,
+			config.getCellAddress(finalPos[1]).MiddleCenter,
+			err
 	}
 
-	for len(VisitedCells) < (config.Length * config.Width) {
+	for len(visitedCells) < (config.Length * config.Width) {
 		for {
 			neighbors = config.getPresentNeighbors(currentPos)
 
@@ -54,17 +54,17 @@ func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, err
 			currentPos = cellsPath[len(cellsPath)-1]
 		}
 
-		randPos = neighbors[GetRandomNo(len(neighbors))]
+		randPos = neighbors[getRandomNo(len(neighbors))]
 
-		if _, ok = VisitedCells[randPos]; !ok {
-			VisitedCells[randPos] = config.GetCellAddress(randPos)
+		if _, ok := visitedCells[randPos]; !ok {
+			visitedCells[randPos] = config.getCellAddress(randPos)
 
 			config.createPath(maze[:], currentPos, randPos)
-
 			cellsPath = append(cellsPath, randPos)
 
 			if len(cellsPath) > finalPos[0] {
 				finalPos[:][1] = randPos
+				finalPos[:][0] = len(cellsPath)
 			}
 
 			currentPos = randPos
@@ -73,7 +73,10 @@ func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, err
 
 	err = config.optimizeMaze(intensity, maze[:])
 
-	return maze, startPos, finalPos[1], err
+	return maze,
+		config.getCellAddress(startPos).MiddleCenter,
+		config.getCellAddress(finalPos[1]).MiddleCenter,
+		err
 }
 
 // createPath creates a path on the common wall between the current and the new cell.
@@ -81,9 +84,9 @@ func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, err
 // Wall characters are defined by the intensity value used while creating the grid view.
 func (config *Dimensions) createPath(maze [][]string, currentCellNo, newCellNo int) {
 	var (
-		addr = config.GetCellAddress(currentCellNo)
+		addr = config.getCellAddress(currentCellNo)
 
-		neighbors = config.GetCellNeighbors(currentCellNo)
+		neighbors = config.getCellNeighbors(currentCellNo)
 	)
 
 	switch newCellNo {
@@ -108,19 +111,19 @@ func (config *Dimensions) getPresentNeighbors(cellNo int) []int {
 		ok           bool
 		presentCells []int
 
-		neighbors = config.GetCellNeighbors(cellNo)
+		neighbors = config.getCellNeighbors(cellNo)
 	)
 
-	if _, ok = VisitedCells[neighbors.Bottom]; !ok && neighbors.Bottom != 0 {
+	if _, ok = visitedCells[neighbors.Bottom]; !ok && neighbors.Bottom != 0 {
 		presentCells = append(presentCells, neighbors.Bottom)
 	}
-	if _, ok = VisitedCells[neighbors.Left]; !ok && neighbors.Left != 0 {
+	if _, ok = visitedCells[neighbors.Left]; !ok && neighbors.Left != 0 {
 		presentCells = append(presentCells, neighbors.Left)
 	}
-	if _, ok = VisitedCells[neighbors.Right]; !ok && neighbors.Right != 0 {
+	if _, ok = visitedCells[neighbors.Right]; !ok && neighbors.Right != 0 {
 		presentCells = append(presentCells, neighbors.Right)
 	}
-	if _, ok = VisitedCells[neighbors.Top]; !ok && neighbors.Top != 0 {
+	if _, ok = visitedCells[neighbors.Top]; !ok && neighbors.Top != 0 {
 		presentCells = append(presentCells, neighbors.Top)
 	}
 
@@ -137,7 +140,7 @@ func (config *Dimensions) getStartPosition() int {
 	)
 
 	for {
-		randCellNo = GetRandomNo((config.Length * config.Width) + 1)
+		randCellNo = getRandomNo((config.Length * config.Width) + 1)
 
 		neighbors = config.getPresentNeighbors(randCellNo)
 
@@ -151,7 +154,7 @@ func (config *Dimensions) getStartPosition() int {
 // be more clear and sharp when printed on the terminal.
 func (config *Dimensions) optimizeMaze(intensity int, maze [][]string) error {
 	var (
-		addr  CellAddress
+		addr  cellAddress
 		chars []string
 		err   error
 
@@ -194,7 +197,7 @@ func (config *Dimensions) optimizeMaze(intensity int, maze [][]string) error {
 	}
 
 	for cell := 1; cell <= (config.Length * config.Width); cell++ {
-		addr = config.GetCellAddress(cell)
+		addr = config.getCellAddress(cell)
 
 		replaceChar(addr.BottomRight)
 		replaceChar(addr.BottomRight)

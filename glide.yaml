@@ -1,5 +1,6 @@
 package: tapoo
-import: []
+import:
+- package: github.com/nsf/termbox-go
 testImport:
 - package: github.com/smartystreets/goconvey
   subpackages:
