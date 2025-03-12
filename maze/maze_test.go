@@ -53,7 +53,7 @@ func TestCreatePath(t *testing.T) {
 			Width:  5,
 		}
 
-		gridView, err = val.CreatePlayingField(1)
+		gridView, err = val.createPlayingField(1)
 
 		// testData defines the cell number mapped to
 		// the coordinates of the common wall.

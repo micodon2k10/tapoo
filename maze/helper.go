@@ -7,12 +7,12 @@ import (
 )
 
 type (
-	// CellAddress defines the nine points/coordinates that make up an individual cell.
+	// cellAddress defines the nine points/coordinates that make up an individual cell.
 	// Each of the points define the location of a character that is meant to be a
 	// wall or a path of the maze. MiddleCenter represents a part of the path of the maze,
 	// while BottomCenter, BottomLeft, BottomRight, MiddleLeft, MiddleRight, TopCenter,
 	// TopLeft and TopRight can either be a part of the path or a part the wall of the maze.
-	CellAddress struct {
+	cellAddress struct {
 		BottomCenter []int
 		BottomLeft   []int
 		BottomRight  []int
@@ -24,10 +24,10 @@ type (
 		TopRight     []int
 	}
 
-	// CellNeighbors defines the four nieghbors that may surround a given cell.
+	// cellNeighbors defines the four nieghbors that may surround a given cell.
 	// Cells along the maze edges have two to three nieghbors but cells at the center
 	// of the maze have four neighbors.
-	CellNeighbors struct {
+	cellNeighbors struct {
 		Bottom int
 		Left   int
 		Right  int
@@ -35,11 +35,11 @@ type (
 	}
 )
 
-// CreatePlayingField creates the initial version of the maze which is a grid of cells.
+// createPlayingField creates the initial version of the maze which is a grid of cells.
 // The cells are created with characters that are printable on the terminal.
-// CreatePlayingField accept a paramenter with intensity of how thick the
+// createPlayingField accept a paramenter with intensity of how thick the
 // maze walls should be.
-func (config *Dimensions) CreatePlayingField(intensity int) ([][]string, error) {
+func (config *Dimensions) createPlayingField(intensity int) ([][]string, error) {
 	var (
 		chars []string
 		err   error
@@ -72,14 +72,14 @@ func (config *Dimensions) CreatePlayingField(intensity int) ([][]string, error) 
 	return data, nil
 }
 
-// GetCellAddress creates and returns the cell address of the provided cell.
+// getCellAddress creates and returns the cell address of the provided cell.
 // A cell address is defined by the nine coordinates, where each of them represents the
 // actual position of a terminal printable character that becomes a part of the maze.
-func (config *Dimensions) GetCellAddress(cellNo int) CellAddress {
+func (config *Dimensions) getCellAddress(cellNo int) cellAddress {
 	var len int
 
 	if cellNo > (config.Length * config.Width) {
-		return CellAddress{}
+		return cellAddress{}
 	}
 
 	if len = cellNo % config.Length; len == 0 {
@@ -89,7 +89,7 @@ func (config *Dimensions) GetCellAddress(cellNo int) CellAddress {
 	var wid = getCeiledDivisor(cellNo, config.Length) * 2
 	len = len * 2
 
-	return CellAddress{
+	return cellAddress{
 		BottomCenter: []int{wid, len - 1},
 		BottomLeft:   []int{wid, len - 2},
 		BottomRight:  []int{wid, len},
@@ -102,10 +102,10 @@ func (config *Dimensions) GetCellAddress(cellNo int) CellAddress {
 	}
 }
 
-// GetCellNeighbors fetches all the possible neighbors of the provided cell.
-func (config *Dimensions) GetCellNeighbors(cellNo int) CellNeighbors {
+// getCellNeighbors fetches all the possible neighbors of the provided cell.
+func (config *Dimensions) getCellNeighbors(cellNo int) cellNeighbors {
 	if cellNo > (config.Length * config.Width) {
-		return CellNeighbors{}
+		return cellNeighbors{}
 	}
 
 	var (
@@ -113,7 +113,7 @@ func (config *Dimensions) GetCellNeighbors(cellNo int) CellNeighbors {
 		left      = cellNo - 1
 		top       = cellNo - config.Length
 		bottom    = cellNo + config.Length
-		neighbors = CellNeighbors{}
+		neighbors = cellNeighbors{}
 	)
 
 	if getCeiledDivisor(right, config.Length) == getCeiledDivisor(cellNo, config.Length) {
@@ -135,10 +135,10 @@ func (config *Dimensions) GetCellNeighbors(cellNo int) CellNeighbors {
 	return neighbors
 }
 
-// GetRandomNo returns a random number generated from
+// getRandomNo returns a random number generated from
 // the current timestamp and should be less the max value
 // provided and greater than or equal to zero. (0 <= X < max)
-func GetRandomNo(max int) int {
+func getRandomNo(max int) int {
 	return int(time.Now().UnixNano() % int64(max))
 }
 

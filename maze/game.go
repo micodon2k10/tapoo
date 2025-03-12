@@ -9,6 +9,8 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
+// coldef maintains the original color used on the
+// background or the foreground depending on its usage.
 const coldef = termbox.ColorDefault
 
 var (
@@ -18,13 +20,14 @@ var (
 	exit = make(chan int)
 )
 
+// fill prints a string to the termbox view box on the given coordinates.
 func fill(x, y int, val string) {
 	for index, char := range val {
 		termbox.SetCell(x+index, y, char, coldef, coldef)
 	}
 }
 
-// drawMaze draws the maze
+// drawMaze draws the maze on the termbox view.
 func drawMaze(config *Dimensions, data [][]string) {
 	var err = termbox.Clear(coldef, coldef)
 	if err != nil {
@@ -40,7 +43,7 @@ func drawMaze(config *Dimensions, data [][]string) {
 	}
 }
 
-// refreshUI refreshes the score value and the blinking cursor
+// refreshUI refreshes the scores value and update the player positions.
 func refreshUI(config *Dimensions, count int, data [][]string) {
 	drawMaze(config, data)
 
@@ -59,6 +62,8 @@ func refreshUI(config *Dimensions, count int, data [][]string) {
 	termbox.Flush()
 }
 
+// gameOverUI displays some text indicating the game is
+// over after a user won or lost a given tapoo game level.
 func gameOverUI(msg string, config *Dimensions, data [][]string) {
 	drawMaze(config, data)
 
@@ -73,37 +78,53 @@ func gameOverUI(msg string, config *Dimensions, data [][]string) {
 	termbox.Flush()
 }
 
-func handlePlayersMovement(config *Dimensions, data [][]string) {
+// playerMovement calculates the actual player position
+// depending on the navigation keys pressed.
+func playerMovement(config *Dimensions, data [][]string, direction string) {
+	var xVal, zVal = startPos[1], startPos[0]
+
+	switch direction {
+	case "LEFT":
+		if (xVal-2) > 0 && strings.Contains(data[zVal][xVal-1], " ") {
+			startPos[1] = xVal - 2
+		}
+	case "RIGHT":
+		if (xVal+2) <= config.Length*2 && strings.Contains(data[zVal][xVal+1], " ") {
+			startPos[1] = xVal + 2
+		}
+	case "UP":
+		if (zVal-2) > 0 && strings.Contains(data[zVal-1][xVal], " ") {
+			startPos[0] = zVal - 2
+		}
+	case "DOWN":
+		if (zVal+2) <= config.Width*2 && strings.Contains(data[zVal+1][xVal], " ") {
+			startPos[0] = zVal + 2
+		}
+	}
+}
+
+// handlePlayerMovement detects that keys pressed on the keyboard
+// and provides that direction that the player should move to.
+func handlePlayerMovement(config *Dimensions, data [][]string) {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			var (
-				xVal = startPos[1]
-				zVal = startPos[0]
-			)
+
 			switch ev.Key {
 			case termbox.KeyEsc, termbox.KeyCtrlC:
 				exit <- 2
 
 			case termbox.KeyArrowLeft:
-				if (xVal-2) > 0 && strings.Contains(data[zVal][xVal-1], " ") {
-					startPos[1] = xVal - 2
-				}
+				playerMovement(config, data, "LEFT")
 
 			case termbox.KeyArrowRight:
-				if (xVal+2) <= config.Length*2 && strings.Contains(data[zVal][xVal+1], " ") {
-					startPos[1] = xVal + 2
-				}
+				playerMovement(config, data, "RIGHT")
 
 			case termbox.KeyArrowUp:
-				if (zVal-2) > 0 && strings.Contains(data[zVal-1][xVal], " ") {
-					startPos[0] = zVal - 2
-				}
+				playerMovement(config, data, "UP")
 
 			case termbox.KeyArrowDown:
-				if (zVal+2) <= config.Width*2 && strings.Contains(data[zVal+1][xVal], " ") {
-					startPos[0] = zVal + 2
-				}
+				playerMovement(config, data, "DOWN")
 			}
 		case termbox.EventError:
 			panic(ev.Err)
@@ -111,18 +132,14 @@ func handlePlayersMovement(config *Dimensions, data [][]string) {
 	}
 }
 
-// Start define where the tapoo game
-// execution should start from.
+// Start define where the tapoo game starts at.
 func Start() {
 	var (
-		data                  [][]string
-		startCell, targetCell int
-
-		timer      = time.NewTicker(500 * time.Microsecond)
-		val        = &Dimensions{Length: 30, Width: 7}
-		totalCells = val.Length * val.Width
-		timeout    = time.NewTimer(time.Duration(totalCells) * time.Second)
-
+		data        [][]string
+		timer       = time.NewTicker(500 * time.Microsecond)
+		val         = &Dimensions{Length: 30, Width: 7}
+		totalCells  = val.Length * val.Width
+		timeout     = time.NewTimer(time.Duration(totalCells) * time.Second)
 		currentTime = time.Now().Unix()
 		err         = termbox.Init()
 	)
@@ -134,15 +151,11 @@ func Start() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	data, startCell, targetCell, err = val.GenerateMaze(1)
-	if err != nil {
+	if data, startPos, targetPos, err = val.GenerateMaze(1); err != nil {
 		panic(err)
 	}
 
-	startPos = val.GetCellAddress(startCell).MiddleCenter
-	targetPos = val.GetCellAddress(targetCell).MiddleCenter
-
-	go handlePlayersMovement(val, data)
+	go handlePlayerMovement(val, data)
 
 mainloop:
 	for {
@@ -152,9 +165,7 @@ mainloop:
 
 			refreshUI(val, scores, data)
 		case <-timeout.C:
-			go func() {
-				exit <- 1
-			}()
+			go func() { exit <- 1 }()
 
 		case exitStatus := <-exit:
 			timer.Stop()
