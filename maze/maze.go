@@ -65,6 +65,7 @@ func (config *Dimensions) GenerateMaze(intensity int) ([][]string, int, int, err
 
 			if len(cellsPath) > finalPos[0] {
 				finalPos[:][1] = randPos
+				finalPos[:][0] = len(cellsPath)
 			}
 
 			currentPos = randPos
