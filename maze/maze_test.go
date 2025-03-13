@@ -29,11 +29,11 @@ func TestGenerateMaze(t *testing.T) {
 
 	Convey("Given the correct intensity value", t, func() {
 		Convey("The maze should be generated without an error", func() {
-			var data, startPos, finalPos, err = val.generateMaze(1)
+			data, startPos, finalPos, err := val.generateMaze(1)
 
 			So(data, ShouldNotBeEmpty)
-			So(startPos, ShouldNotEqual, 0)
-			So(finalPos, ShouldNotEqual, 0)
+			So(startPos, ShouldNotBeEmpty)
+			So(finalPos, ShouldNotBeEmpty)
 			So(err, ShouldBeNil)
 
 			for _, walls := range data {
@@ -41,6 +41,17 @@ func TestGenerateMaze(t *testing.T) {
 			}
 
 			log.Println("Maze \n", strings.Join(compressedView, ""))
+		})
+
+		Convey("If an incorrect intensity value is used an error should be returned ", func() {
+			data, startPos, finalPos, err := val.generateMaze(4)
+
+			So(data, ShouldBeEmpty)
+			So(startPos, ShouldNotBeEmpty)
+			So(finalPos, ShouldNotBeEmpty)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "Invalid value of intensity found:")
+			So(err, ShouldImplement, (*error)(nil))
 		})
 	})
 }

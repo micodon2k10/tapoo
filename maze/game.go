@@ -44,7 +44,7 @@ var (
 
 // playerMovement calculates the actual player position
 // depending on the navigation keys pressed.
-func playerMovement(config *Dimensions, data [][]string, direction string) {
+func (config *Dimensions) playerMovement(data [][]string, direction string) {
 	var xVal, zVal = startPos[1], startPos[0]
 
 	switch {
@@ -64,33 +64,38 @@ func playerMovement(config *Dimensions, data [][]string, direction string) {
 
 // handlePlayerMovement detects that keys pressed on the keyboard
 // and provides that direction that the player should move to.
-func handlePlayerMovement(config *Dimensions, data [][]string) {
+func (config *Dimensions) handlePlayerMovement(event termbox.Key, data [][]string) {
+	switch event {
+	case termbox.KeyEsc, termbox.KeyCtrlC:
+		status <- quit
+
+	case termbox.KeyCtrlP:
+		status <- proceed
+
+	case termbox.KeySpace:
+		status <- pause
+
+	case termbox.KeyArrowLeft:
+		config.playerMovement(data, "LEFT")
+
+	case termbox.KeyArrowRight:
+		config.playerMovement(data, "RIGHT")
+
+	case termbox.KeyArrowUp:
+		config.playerMovement(data, "UP")
+
+	case termbox.KeyArrowDown:
+		config.playerMovement(data, "DOWN")
+	}
+}
+
+// handleKeyboardMapping handles all the keyboard input as captured by termbox
+func (config *Dimensions) handleKeyboardMapping(data [][]string) {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
+			config.handlePlayerMovement(ev.Key, data)
 
-			switch ev.Key {
-			case termbox.KeyEsc, termbox.KeyCtrlC:
-				status <- quit
-
-			case termbox.KeyCtrlP:
-				status <- proceed
-
-			case termbox.KeySpace:
-				status <- pause
-
-			case termbox.KeyArrowLeft:
-				playerMovement(config, data, "LEFT")
-
-			case termbox.KeyArrowRight:
-				playerMovement(config, data, "RIGHT")
-
-			case termbox.KeyArrowUp:
-				playerMovement(config, data, "UP")
-
-			case termbox.KeyArrowDown:
-				playerMovement(config, data, "DOWN")
-			}
 		case termbox.EventError:
 			panic(ev.Err)
 		}
@@ -122,7 +127,7 @@ func Start() {
 	data, startPos, targetPos, err = val.generateMaze(1)
 	errfunc(err)
 
-	go handlePlayerMovement(val, data)
+	go val.handleKeyboardMapping(data)
 
 	var (
 		timer       = time.NewTicker(500 * time.Microsecond)
