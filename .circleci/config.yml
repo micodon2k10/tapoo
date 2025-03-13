@@ -6,7 +6,9 @@ jobs:
   build:
     docker:
       # specify the version
-      - image: circleci/golang:1.8
+      - image: circleci/golang:1.10
+        environment:
+            CC_TEST_REPORTER_ID: 8049231953d791ee8c740f7d30134bc2b3fad03a7dcd9338b2f5987f46f40b30
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -24,4 +26,5 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go build -v
-      - run: go test -v -race -cover ./...
+      - run: go test -v -race -covermode=atomic -coverprofile=profile.cov  ./...
+      

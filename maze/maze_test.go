@@ -29,7 +29,7 @@ func TestGenerateMaze(t *testing.T) {
 
 	Convey("Given the correct intensity value", t, func() {
 		Convey("The maze should be generated without an error", func() {
-			var data, startPos, finalPos, err = val.GenerateMaze(1)
+			var data, startPos, finalPos, err = val.generateMaze(1)
 
 			So(data, ShouldNotBeEmpty)
 			So(startPos, ShouldNotEqual, 0)

@@ -16,10 +16,10 @@ type Dimensions struct {
 	Width  int
 }
 
-// GenerateMaze converts the created grid view playing field into a series on paths and walls.
+// generateMaze converts the created grid view playing field into a series on paths and walls.
 // The Maze is created such that only a single path can exists between the starting point and
 // and the goal.
-func (config *Dimensions) GenerateMaze(intensity int) ([][]string, []int, []int, error) {
+func (config *Dimensions) generateMaze(intensity int) ([][]string, []int, []int, error) {
 	var (
 		neighbors []int
 		randPos   int

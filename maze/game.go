@@ -119,7 +119,7 @@ func Start() {
 	val, err := getMazeDimensions(1, getTerminalSize(termbox.Size()))
 	errfunc(err)
 
-	data, startPos, targetPos, err = val.GenerateMaze(1)
+	data, startPos, targetPos, err = val.generateMaze(1)
 	errfunc(err)
 
 	go handlePlayerMovement(val, data)
