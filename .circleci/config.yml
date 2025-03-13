@@ -25,6 +25,13 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
+      - run: go get -u github.com/axw/gocov/gocov
       - run: go build -v
-      - run: go test -v -race -covermode=atomic -coverprofile=profile.cov  ./...
+      
+      - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      - run: chmod +x ./cc-test-reporter
+      - run: ./cc-test-reporter before-build
+      - run: go test -v -coverprofile=out -race ./...
+      - run: ./cc-test-reporter format-coverage --input-type gocov out 
+      - run: ./cc-test-reporter upload-coverage
       
