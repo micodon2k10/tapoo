@@ -165,3 +165,100 @@ func TestGetCellNeighbors(t *testing.T) {
 		})
 	})
 }
+
+// TestGetRandomNo tests the functionality of getRandomNo
+func TestGetRandomNo(t *testing.T) {
+	Convey("TestGetRandomNo: Given a value ", t, func() {
+		Convey("that is greater than zero, the random number generated should be greater than zero but less than or equal to the value provided", func() {
+			val := getRandomNo(12)
+			So(val, ShouldBeLessThanOrEqualTo, 12)
+			So(val, ShouldBeGreaterThan, 0)
+		})
+	})
+}
+
+// TestGetCeiledDivisor tests the functionality of getCeiledDivisor
+func TestGetCeiledDivisor(t *testing.T) {
+	var testFunc = func(input map[int][]int) {
+		for output, val := range input {
+			So(getCeiledDivisor(val[0], val[1]), ShouldEqual, output)
+		}
+	}
+
+	Convey("TestGetCeiledDivisor: Given a numerator and a denominator", t, func() {
+		Convey("where both numbers are positive but neither is equal to zero a value greater than one is always returned", func() {
+			testVal := map[int][]int{
+				1: []int{5, 6},
+				2: []int{4, 3},
+				4: []int{24, 6},
+			}
+
+			testFunc(testVal)
+
+			// could fit in the testVal
+			testFunc(map[int][]int{1: []int{4, 4}})
+		})
+
+		Convey("where both values are zero or either is zero, the output should always be zero or a -9223372036854775808 depending on the machine instruction size ", func() {
+			// -9223372036854775808 is the smallest int64 value returned when an integer is divided by zero on a 64 bit machine.
+			// On a 32 bit machine zero is returned when an integer is divided by zero
+			if strconv.IntSize == 64 {
+				testFunc(map[int][]int{-9223372036854775808: []int{0, 0}})
+
+				testFunc(map[int][]int{-9223372036854775808: []int{10, 0}})
+			} else {
+				testFunc(map[int][]int{0: []int{0, 0}})
+
+				testFunc(map[int][]int{0: []int{10, 0}})
+			}
+
+			testFunc(map[int][]int{0: []int{0, 8}})
+		})
+	})
+}
+
+// TestGetWallCharacters tests the functionality of getWallCharacters
+func TestGetWallCharacters(t *testing.T) {
+	Convey("TestGetWallCharacters: Given a wall intensity value ", t, func() {
+		Convey("that is neither equal to 1, 2, or 3 the second value returned should implement an error", func() {
+			for _, i := range []int{-1, 0, 4, 5} {
+				val, err := getWallCharacters(i)
+
+				So(err, ShouldImplement, (*error)(nil))
+				So(err.Error(), ShouldContainSubstring, "Invalid value of intensity found:")
+				So(val, ShouldHaveLength, 0)
+				So(cap(val), ShouldEqual, 0)
+			}
+		})
+
+		Convey("that range between 1 and 3 with 1 and 3 are included, the three wall characters should be returned", func() {
+			testVal := map[int][]string{
+				1: []string{"|", "---", "-"},
+				2: []string{"╏", "╍╍╍", "╍"},
+				3: []string{"║", "===", "="},
+			}
+
+			for i, output := range testVal {
+				val, err := getWallCharacters(i)
+
+				So(err, ShouldBeNil)
+				So(val, ShouldContain, output[0])
+				So(val, ShouldContain, output[1])
+				So(val, ShouldContain, output[2])
+				So(val, ShouldHaveLength, 3)
+			}
+		})
+	})
+}
+
+// TestIsSpaceFound tests the functionality of isSpaceFound
+func TestIsSpaceFound(t *testing.T) {
+	Convey("TestIsSpaceFound: Given a string", t, func() {
+		Convey("with or without the space character, the correct boolean should be returned ", func() {
+			So(isSpaceFound(""), ShouldBeFalse)
+			So(isSpaceFound(" "), ShouldBeTrue)
+			So(isSpaceFound("hsghdsgd"), ShouldBeFalse)
+			So(isSpaceFound("space "), ShouldBeTrue)
+		})
+	})
+}

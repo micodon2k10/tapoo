@@ -3,6 +3,7 @@ package maze
 import (
 	"fmt"
 	"math"
+	"strings"
 	"time"
 )
 
@@ -162,4 +163,10 @@ func getWallCharacters(intensity int) ([]string, error) {
 
 	return chars, fmt.Errorf(
 		"Invalid value of intensity found: %d. Allowed 1, 2 and 3", intensity)
+}
+
+// isSpaceFound checks for the space character in a given string
+// Boolean true is returned if space is found
+func isSpaceFound(item string) bool {
+	return strings.Contains(item, " ")
 }
