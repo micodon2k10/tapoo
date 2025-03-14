@@ -82,10 +82,13 @@ func TestGetCellAddress(t *testing.T) {
 		}
 	)
 
-	Convey("Given the grid view of 6 by 5 cells of a maze ", t, func() {
+	Convey("TestGetCellAddress: Given the grid view of 6 by 5 cells of a maze and a cell number ", t, func() {
+		Convey("the does not exist in the grid view provided, an empty cellAddress should be returned", func() {
+			emptyAddr := val.getCellAddress(5000)
+			So(emptyAddr, ShouldResemble, (cellAddress{}))
+		})
 
-		Convey("The cell address returned should help fetch a cell label"+
-			" matching the cell number ", func() {
+		Convey("that exists in the provided grid a matching cell address should be returned", func() {
 			for i := 1; i <= (val.Length * val.Width); i++ {
 				k = val.getCellAddress(i)
 
