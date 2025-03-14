@@ -8,14 +8,16 @@ var visitedCells = map[int]cellAddress{}
 // the horizontal edges. Length represents the number of the cells along the horizontal
 // edge while Width represents the number of the cells along the vertical edge.
 type Dimensions struct {
-	Length int
-	Width  int
+	Length        int
+	Width         int
+	StartPosition []int
+	FinalPosition []int
 }
 
 // generateMaze converts the created grid view playing field into a series on paths and walls.
 // The Maze is created such that only a single path can exists between the starting point and
 // and the goal.
-func (config *Dimensions) generateMaze(intensity int) ([][]string, []int, []int, error) {
+func (config *Dimensions) generateMaze(intensity int) ([][]string, error) {
 	var (
 		neighbors []int
 		randPos   int
@@ -28,10 +30,7 @@ func (config *Dimensions) generateMaze(intensity int) ([][]string, []int, []int,
 	)
 
 	if err != nil {
-		return [][]string{},
-			config.getCellAddress(startPos).MiddleCenter,
-			config.getCellAddress(finalPos[1]).MiddleCenter,
-			err
+		return [][]string{}, err
 	}
 
 	visitedCells[currentPos] = config.getCellAddress(currentPos)
@@ -67,23 +66,20 @@ func (config *Dimensions) generateMaze(intensity int) ([][]string, []int, []int,
 		}
 	}
 
+	config.FinalPosition = config.getCellAddress(finalPos[1]).MiddleCenter
+	config.StartPosition = config.getCellAddress(startPos).MiddleCenter
+
 	err = config.optimizeMaze(intensity, maze[:])
 
-	return maze,
-		config.getCellAddress(startPos).MiddleCenter,
-		config.getCellAddress(finalPos[1]).MiddleCenter,
-		err
+	return maze, err
 }
 
 // createPath creates a path on the common wall between the current and the new cell.
 // A path is created by replacing the wall characters with the respective number of blank spaces.
 // Wall characters are defined by the intensity value used while creating the grid view.
 func (config *Dimensions) createPath(maze [][]string, currentCellNo, newCellNo int) {
-	var (
-		addr = config.getCellAddress(currentCellNo)
-
-		neighbors = config.getCellNeighbors(currentCellNo)
-	)
+	addr := config.getCellAddress(currentCellNo)
+	neighbors := config.getCellNeighbors(currentCellNo)
 
 	switch newCellNo {
 	case neighbors.Bottom:
@@ -147,9 +143,9 @@ func (config *Dimensions) optimizeMaze(intensity int, maze [][]string) error {
 		chars []string
 		err   error
 	)
-
+	// This error will never be caught
 	if chars, err = getWallCharacters(intensity); err != nil {
-		return err
+		panic(err)
 	}
 
 	for cell := 1; cell <= (config.Length * config.Width); cell++ {
@@ -164,11 +160,10 @@ func (config *Dimensions) optimizeMaze(intensity int, maze [][]string) error {
 
 // replaceChar switches left and right wall character with a top and bottom wall character.
 func (config *Dimensions) replaceChar(point []int, replChar string, maze [][]string) {
-	var (
-		elemTop, elemBottom = "", ""
 
-		lenTop, lenBottom = false, false
-	)
+	elemTop, elemBottom := "", ""
+	lenTop, lenBottom := false, false
+
 	// checks if the top point in relation to the given point can be calculated
 	if (point[0] - 1) > 0 {
 		elemTop = maze[point[0]-1][point[1]]

@@ -34,8 +34,7 @@ const (
 )
 
 var (
-	scores              int
-	startPos, targetPos []int
+	scores int
 
 	paused = false
 
@@ -45,7 +44,8 @@ var (
 // playerMovement calculates the actual player position
 // depending on the navigation keys pressed.
 func (config *Dimensions) playerMovement(data [][]string, direction string) {
-	var xVal, zVal = startPos[1], startPos[0]
+	startPos := config.StartPosition
+	xVal, zVal := startPos[1], startPos[0]
 
 	switch {
 	case (direction == "LEFT") && ((xVal - 2) > 0) && isSpaceFound(data[zVal][xVal-1]):
@@ -124,7 +124,7 @@ func Start() {
 	val, err := getMazeDimensions(1, getTerminalSize(termbox.Size()))
 	errfunc(err)
 
-	data, startPos, targetPos, err = val.generateMaze(1)
+	data, err = val.generateMaze(1)
 	errfunc(err)
 
 	go val.handleKeyboardMapping(data)

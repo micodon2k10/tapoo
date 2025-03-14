@@ -47,6 +47,8 @@ func drawMaze(config *Dimensions, data [][]string) {
 // refreshUI refreshes the scores value and update the player positions.
 func refreshUI(config *Dimensions, count int, data [][]string) {
 	drawMaze(config, data)
+	targetPos := config.FinalPosition
+	startPos := config.StartPosition
 
 	termbox.SetCell((targetPos[1]*2)+3, targetPos[0]+7, '#', termbox.ColorRed, termbox.ColorRed)
 	termbox.SetCell((startPos[1]*2)+3, startPos[0]+7, '@', termbox.ColorGreen, termbox.ColorGreen)
