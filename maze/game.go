@@ -49,16 +49,16 @@ func (config *Dimensions) playerMovement(data [][]string, direction string) {
 
 	switch {
 	case (direction == "LEFT") && ((xVal - 2) > 0) && isSpaceFound(data[zVal][xVal-1]):
-		startPos[1] = xVal - 2
+		config.StartPosition[1] = xVal - 2
 
 	case (direction == "RIGHT") && ((xVal + 2) <= config.Length*2) && isSpaceFound(data[zVal][xVal+1]):
-		startPos[1] = xVal + 2
+		config.StartPosition[1] = xVal + 2
 
 	case (direction == "UP") && ((zVal - 2) > 0) && isSpaceFound(data[zVal-1][xVal]):
-		startPos[0] = zVal - 2
+		config.StartPosition[0] = zVal - 2
 
 	case (direction == "DOWN") && ((zVal + 2) <= config.Width*2) && isSpaceFound(data[zVal+1][xVal]):
-		startPos[0] = zVal + 2
+		config.StartPosition[0] = zVal + 2
 	}
 }
 
