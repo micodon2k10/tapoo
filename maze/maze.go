@@ -18,20 +18,18 @@ type Dimensions struct {
 // The Maze is created such that only a single path can exists between the starting point and
 // and the goal.
 func (config *Dimensions) generateMaze(intensity int) ([][]string, error) {
-	var (
-		neighbors []int
-		randPos   int
+	var neighbors []int
 
-		maze, err  = config.createPlayingField(intensity)
-		startPos   = config.getStartPosition()
-		finalPos   = []int{1, startPos}
-		currentPos = startPos
-		cellsPath  = []int{startPos}
-	)
+	startPos := config.getStartPosition()
 
+	finalPos, cellsPath, currentPos := []int{1, startPos}, []int{startPos}, startPos
+
+	maze, err := config.createPlayingField(intensity)
 	if err != nil {
 		return [][]string{}, err
 	}
+
+	config.StartPosition = config.getCellAddress(startPos).MiddleCenter
 
 	visitedCells[currentPos] = config.getCellAddress(currentPos)
 
@@ -45,33 +43,28 @@ func (config *Dimensions) generateMaze(intensity int) ([][]string, error) {
 				break
 			}
 
-			cellsPath = cellsPath[:len(cellsPath)-1]
-			currentPos = cellsPath[len(cellsPath)-1]
+			cellsPath, currentPos = cellsPath[:len(cellsPath)-1], cellsPath[len(cellsPath)-1]
 		}
 
-		randPos = neighbors[getRandomNo(len(neighbors))]
+		startPos = neighbors[getRandomNo(len(neighbors))]
 
-		if _, ok := visitedCells[randPos]; !ok {
-			visitedCells[randPos] = config.getCellAddress(randPos)
+		if _, ok := visitedCells[startPos]; !ok {
+			visitedCells[startPos] = config.getCellAddress(startPos)
 
-			config.createPath(maze[:], currentPos, randPos)
-			cellsPath = append(cellsPath, randPos)
+			config.createPath(maze[:], currentPos, startPos)
+			cellsPath = append(cellsPath, startPos)
 
 			if len(cellsPath) > finalPos[0] {
-				finalPos[:][1] = randPos
-				finalPos[:][0] = len(cellsPath)
+				finalPos[:][1], finalPos[:][0] = startPos, len(cellsPath)
 			}
 
-			currentPos = randPos
+			currentPos = startPos
 		}
 	}
 
 	config.FinalPosition = config.getCellAddress(finalPos[1]).MiddleCenter
-	config.StartPosition = config.getCellAddress(startPos).MiddleCenter
 
-	err = config.optimizeMaze(intensity, maze[:])
-
-	return maze, err
+	return maze[:], config.optimizeMaze(intensity, maze[:])
 }
 
 // createPath creates a path on the common wall between the current and the new cell.
