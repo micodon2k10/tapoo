@@ -57,6 +57,23 @@ func TestGetUser(t *testing.T) {
 			errFunc(user, "sql: no rows in result set")
 		})
 
+		Convey("closed db connections, a value that implements an error interface should"+
+			" be returned", func() {
+			copyOfDb := cloneDb()
+			db.Close()
+			user := &UserInfor{Level: 2, TapooID: "fake_sample_id"}
+			data, err := user.getUser()
+
+			db = copyOfDb
+
+			So(db.Ping(), ShouldBeNil)
+
+			So(err, ShouldNotBeNil)
+			So(data, ShouldBeNil)
+			So(err, ShouldImplement, (*error)(nil))
+			So(err.Error(), ShouldContainSubstring, "sql: database is closed")
+		})
+
 		Convey("the values used are properly escaped and the tapoo id exists in the db, "+
 			"a nil error value should be returned", func() {
 			user := &UserInfor{Level: 18, TapooID: "GzlWAL0mP"}
