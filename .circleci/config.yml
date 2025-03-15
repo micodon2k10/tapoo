@@ -9,6 +9,18 @@ jobs:
       - image: circleci/golang:1.10
         environment:
             CC_TEST_REPORTER_ID: 8049231953d791ee8c740f7d30134bc2b3fad03a7dcd9338b2f5987f46f40b30
+            TAPOO_DB_NAME: tapoo_db 
+            TAPOO_DB_USER_NAME: tapoo 
+            TAPOO_DB_USER_PASSWORD: t9BhVS85Z 
+            TAPOO_DB_HOST: localhost
+
+      - image: circleci/mysql:5.7
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: true
+            MYSQL_USER: tapoo
+            MYSQL_PASSWORD: t9BhVS85Z
+            MYSQL_RANDOM_ROOT_PASSWORD: yes
+            MYSQL_DATABASE: tapoo_db
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images

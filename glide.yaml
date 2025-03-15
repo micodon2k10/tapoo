@@ -1,6 +1,11 @@
 package: tapoo
 import:
+- package: github.com/dmigwi/tapoo
+  subpackages:
+  - maze
+- package: github.com/go-sql-driver/mysql
 - package: github.com/nsf/termbox-go
+- package: github.com/satori/go.uuid
 testImport:
 - package: github.com/smartystreets/goconvey
   subpackages:
